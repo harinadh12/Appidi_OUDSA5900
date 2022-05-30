@@ -12,3 +12,4 @@ np.random.seed(0)
 print(tff.federated_computation(lambda: 'Hello, World!')())
 
 emnist_train, emnist_test = tff.simulation.datasets.emnist.load_data()
+
