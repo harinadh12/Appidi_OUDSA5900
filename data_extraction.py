@@ -20,6 +20,7 @@ from sklearn.preprocessing import StandardScaler
 # 
 
 LABEL_FREQUENCY = 700
+DATASET_PATH = "../WESAD/"
 
 class ReadSubjectData:
     def __init__(self, file_path):
@@ -110,7 +111,7 @@ class ReadSubjectData:
         new_labels = np.empty((labels.shape[0]//LABEL_FREQUENCY),)
 
         for i in range(0, len(labels),LABEL_FREQUENCY):
-            new_labels[idx] = np.rint(np.mean(labels[i:i+700]))
+            new_labels[idx] = np.rint(np.mean(labels[i:i+LABEL_FREQUENCY]))
             idx +=1
 
         return new_labels
@@ -164,7 +165,7 @@ def create_train_test_data(features, labels):
     # train_dataset['features'] = obj.pca_dimension_reduction(train_dataset['features'])
     train_dataset['features'] = obj.standardize_data(train_dataset['features'] , train=True)
 
-    # test_dataset['features'] = obj.pca_dimension_reduction(test_dataset['features'])
+    # # test_dataset['features'] = obj.pca_dimension_reduction(test_dataset['features'])
     test_dataset['features'] = obj.standardize_data(test_dataset['features'] , train=False)
 
     return train_dataset, test_dataset
@@ -185,8 +186,6 @@ if __name__=="__main__":
         if os.path.exists(f'{DATASET_PATH}/{subject_no}_train_data.npy')  :
             continue
         
-        print(file_path)
-
         # create an object for read_subject_data passing pickle file
         obj = ReadSubjectData(
             file_path=file_path
@@ -200,9 +199,10 @@ if __name__=="__main__":
 
         # get labels(subject's activity) from subject object
         labels = obj.get_labels()
+        keys = ['ACC','ECG','EMG','EDA','Temp','Resp']
 
         # extract feature from chest data di t and aggregate them based on frequency window
-        chest_data = np.concatenate([chest_data_dict[key] for key in chest_data_dict], axis=1)
+        chest_data = np.concatenate([chest_data_dict[key] for key in keys], axis=1)
 
 
         # Dimensions of different sensors used for chest data measurement
@@ -229,8 +229,7 @@ if __name__=="__main__":
         labels = labels[np.where(np.logical_and(labels>0, labels<4))[0]]
 
         train_dataset, test_dataset = create_train_test_data(features=features, labels=labels)
-
-     
+        
         with open(f'{DATASET_PATH}/{subject_no}_train_data.npy','wb') as f:
             np.save(f, train_dataset)
         
